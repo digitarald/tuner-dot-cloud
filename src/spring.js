@@ -1,104 +1,94 @@
-'use strict';
+import EventEmitter from 'wolfy87-eventemitter';
 
-function Spring(value, options) {
-	options = options || {};
-	this.endValue = value || 0.0;
-	this.value = value || 0.0;
-	this.velocity = 0.0;
-	this.tension = 50.0;
-	this.damping = 0.85;
-	this.active = true;
-	for (var key in options) {
-		if (this.hasOwnProperty(key)) {
-			this[key] = options[key];
-		}
-	}
-	// this.willStep = null;
-	// this.didStep = null;
-	this.ref = null;
-	activeLength++;
-	allSprings.push(this);
-}
+export class Spring extends EventEmitter {
+  velocity = 0.0;
+  tension = 50.0;
+  damping = 0.85;
+  active = true;
+  ref = null;
 
-Spring.prototype = {
-	setEndValue: function(value, reset) {
-		if (this.endValue == value && this.value == value) {
-			return;
-		}
-		this.endValue = value;
-		if (reset) {
-			this.velocity = 0;
-			this.value = value;
-		} else if (!this.active) {
-			this.active = true;
-			activeLength++;
-		}
-	}
+  constructor(value = 0.0, options = {}) {
+    super();
+    this.endValue = value;
+    this.value = value;
+    Object.assign(this, options);
+    activeLength++;
+    allSprings.push(this);
+  }
+
+  setEndValue(value, reset) {
+    if (this.endValue === value && this.value === value) {
+      return;
+    }
+    this.endValue = value;
+    if (reset) {
+      this.velocity = 0;
+      this.value = value;
+    } else if (!this.active) {
+      this.active = true;
+      activeLength++;
+    }
+  }
 };
 
-var allSprings = [];
-var activeLength = 0
-var fdt = 1 / 60;
-var epsilon = 0.01;
-var tail = 0.0;
-var past = 0.0;
+const allSprings = [];
+let activeLength = 0;
+const fdt = 1 / 60;
+const epsilon = 0.01;
+let tail = 0.0;
+let past = 0.0;
 
-Spring.stepAll = function(now) {
-	now /= 1000;
-	if (past == 0) {
-		past = now;
-		return true;
-	}
-	tail += Math.min(now - past, 0.5);
-	past = now;
-	var iterations = Math.floor(tail / fdt);
-	tail -= iterations * fdt;
-	if (iterations == 0 || activeLength == 0) {
-		return false;
-	}
-	for (var i = 0, l = allSprings.length; i < l; i++) {
-		var spring = allSprings[i];
-		if (!spring.active) {
-			continue;
-		}
-		for (var j = 0; j < iterations; j++) {
-			var f = spring.tension * (spring.endValue - spring.value);
-			spring.value += (spring.velocity + f * 0.5 * fdt) * fdt;
-			spring.velocity = (spring.velocity +
-				(f + spring.tension * (spring.endValue - spring.value)) * 0.5 * fdt) *
-				spring.damping;
-			if (Math.abs(spring.value - spring.endValue) < epsilon &&
-				Math.abs(spring.velocity) < epsilon) {
-				spring.active = false;
-				activeLength--;
-				break;
-			}
-		}
-	}
-	return true;
+export function tickSpring(now) {
+  now /= 1000;
+  if (past === 0) {
+    past = now;
+    return true;
+  }
+  tail += Math.min(now - past, 0.5);
+  past = now;
+  const iterations = Math.floor(tail / fdt);
+  tail -= iterations * fdt;
+  if (iterations === 0 || activeLength === 0) {
+    return false;
+  }
+  for (let i = 0, l = allSprings.length; i < l; i++) {
+    const spring = allSprings[i];
+    if (!spring.active) {
+      continue;
+    }
+    for (let j = 0; j < iterations; j++) {
+      const f = spring.tension * (spring.endValue - spring.value);
+      spring.value += (spring.velocity + f * 0.5 * fdt) * fdt;
+      spring.velocity = (spring.velocity +
+        (f + spring.tension * (spring.endValue - spring.value)) * 0.5 * fdt) *
+        spring.damping;
+      if (Math.abs(spring.value - spring.endValue) < epsilon &&
+        Math.abs(spring.velocity) < epsilon) {
+        spring.active = false;
+        activeLength--;
+        break;
+      }
+    }
+  }
+  return true;
 };
 
-Spring.force = function() {
-
-}
-
-Spring.fromValues = function(values, options) {
-	var springs = [];
-	for (var i = 0, l = values.length; i < l; i++) {
-		springs.push(new Spring(values[i], options));
-	};
-	return springs;
+export function createSprings(values, options) {
+  const springs = [];
+  for (let i = 0, l = values.length; i < l; i++) {
+    springs.push(new Spring(values[i], options));
+  };
+  return springs;
 };
 
-Spring.setEndValues = function(springs, values) {
-	for (var i = 0, l = springs.length; i < l; i++) {
-		springs[i].setEndValue(values[i]);
-	};
+export function setSprings(springs, values) {
+  for (let i = 0, l = springs.length; i < l; i++) {
+    springs[i].setEndValue(values[i]);
+  };
 };
 
-Spring.getValues = function(springs, values) {
-	for (var i = 0, l = springs.length; i < l; i++) {
-		values[i] = springs[i].value;
-	};
-	return values;
+export function forEachSpring(springs, callback) {
+  for (let i = 0, l = springs.length; i < l; i++) {
+    callback(springs[i].value, springs[i].ref);
+  };
 };

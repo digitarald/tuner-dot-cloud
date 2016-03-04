@@ -1,14 +1,13 @@
 import Signal from './signal.js';
-import Detector from './detector.js';
 import {noteFromPitch} from './note.js';
 import presets from './presets.js';
-import Render from './canvas.js';
+import Simple from './simple.js';
 import './index.css';
 
 const bufferSize = 8192;
-const fftSize = 2048;
+const fftSize = 4096;
 
-const canvas = new Render(document.getElementById('canvas'));
+const renderer = new Simple();
 const preset = presets.get('piano');
 const signal = new Signal({
   bufferSize,
@@ -16,20 +15,27 @@ const signal = new Signal({
   range: preset.pitchRange
 });
 signal.connect();
-signal.on('volume', ({volume}) => {
-  canvas.set('volume', volume);
-});
 
-const detector = new Detector(signal, {});
-detector.on('result', (pitch, volume) => {
+signal.on('didAnalyse', ({volume}) => {
+  renderer.set('volume', volume);
+});
+signal.on('didSkip', () => {
+  renderer.set('detected', false);
+});
+signal.on('didDetect', ({pitch}) => {
   if (preset.pitchRange[0] > pitch || preset.pitchRange[1] < pitch) {
     return;
   }
-  canvas.set('last', Date.now());
-  canvas.set('pitch', pitch);
   const note = noteFromPitch(pitch);
-  canvas.set('note', note);
-  canvas.set('cents', note.centsOffFromPitch(pitch));
+  renderer.set('detected', true);
+  renderer.set('last', Date.now());
+  renderer.set('pitch', pitch);
+  renderer.set('note', note);
+  renderer.set('cents', note.centsOffFromPitch(pitch));
 });
 
-canvas.update();
+renderer.on('didUpdate', () => {
+  signal.detect();
+});
+
+renderer.start();

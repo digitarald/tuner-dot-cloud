@@ -64,7 +64,8 @@
     "webpack": "^1.12.9",
     "webpack-dev-server": "^1.14.0",
     "webpack-sources": "^0.1.0",
-    "wolfy87-eventemitter": "^4.3.0"
+    "wolfy87-eventemitter": "^4.3.0",
+    "worker-loader": "^0.7.0"
   },
   "dependencies": {
     "md-gum-polyfill": "^1.0.0"
