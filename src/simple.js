@@ -3,7 +3,8 @@ import Canvas from './canvas.js';
 import {Spring, tickSpring} from './spring.js';
 
 export default class Simple extends EventEmitter {
-  graph = new Canvas('rgb(30, 68, 136)');
+  main = new Canvas('rgb(30, 68, 136)');
+  graph = new Canvas();
   updateBound = this.update.bind(this);
   centsSpring = new Spring(0);
   volumeSpring = new Spring(0);
@@ -33,26 +34,14 @@ export default class Simple extends EventEmitter {
     this.detectedSpring.setEndValue(this.detected ? 1 : 0, this.detected);
     tickSpring(now);
 
-    const {ctx, size} = this.graph;
+    const {ctx, size} = this.main;
     const center = [size[0] / 2, size[1] / 2];
-    this.graph.clear();
-    // const volume = this.volumeSpring.value;
-    // if (volume > 0.01) {
-    //   ctx.save();
-    //   ctx.beginPath();
-    //   ctx.fillStyle = '#fff';
-    //   ctx.arc(
-    //     size[0] / 2, size[1] / 2,
-    //     size[1] / 2 * volume,
-    //     0, Math.PI * 2
-    //   );
-    //   ctx.fill();
-    //   ctx.restore();
-    // }
+    this.main.clear();
 
     const cents = this.centsSpring.value / 50;
     const alpha = this.detectedSpring.value * 0.7 + 0.3;
-    const width = 100 - (cents) * 90;
+    const barWidth = center[0] * 0.38;
+    const width = cents * barWidth;
     ctx.save();
     ctx.fillStyle = `rgba(111, 190, 74, ${alpha})`;
     ctx.fillRect(

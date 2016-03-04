@@ -1,7 +1,7 @@
 /* eslint-env worker */
 /* global PitchFinder */
-import './pitchfinder-js/fft.js';
-import './pitchfinder-js/pitchfinder.js';
+importScripts('./src/pitchfinder-js/fft.js');
+importScripts('./src/pitchfinder-js/pitchfinder.js');
 
 let detector = null;
 

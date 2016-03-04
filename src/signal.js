@@ -1,7 +1,7 @@
 import 'md-gum-polyfill';
 import EventEmitter from 'wolfy87-eventemitter';
 // import Detector from './detector.js';
-import DetectPitchWorker from 'worker!./detect-pitch.js';
+import PitchfinderWorker from 'worker!./pitchfinder-worker.js';
 
 const AudioContext = window.AudioContext || window.webkitAudioContext;
 
@@ -10,10 +10,13 @@ class Signal extends EventEmitter {
   source = null;
   volume = 0.0;
   pitch = 0.0;
-  bufferSize = 8192;
+  bufferSize = 2048;
   fftSize = 2048;
   threshold = 0.05;
   range = null;
+  indexRange = null;
+  detecting = false;
+  connected = false;
 
   constructor(options = {}) {
     super();
@@ -23,7 +26,7 @@ class Signal extends EventEmitter {
     }
     this.sampleRate = this.context.sampleRate;
     if (this.range) {
-      this.range = [
+      this.indexRange = [
         Math.floor(this.pitchToIndex(this.range[0])),
         Math.ceil(this.pitchToIndex(this.range[1]))
       ];
@@ -33,13 +36,23 @@ class Signal extends EventEmitter {
 
     this.domainData = new Float32Array(this.fftSize);
     this.frequencyData = new Uint8Array(this.fftSize);
-    this.analyser = this.context.createAnalyser();
-    this.analyser.smoothingTimeConstant = 0.07;
-    this.analyser.fftSize = this.fftSize;
+    // this.analyser = this.context.createAnalyser();
+    // this.analyser.smoothingTimeConstant = 0.07;
+    // this.analyser.fftSize = this.fftSize;
+    this.script = this.context.createScriptProcessor(this.bufferSize, 1, 1);
+    this.script.onaudioprocess = (evt) => {
+      this.detect(evt.inputBuffer);
+    };
 
-    this.worker = new DetectPitchWorker();
-    this.detecting = false;
-    this.worker.onmessage = ({data}) => this.didDetect(data);
+    this.worker = new PitchfinderWorker();
+    this.worker.postMessage({
+      type: 'init',
+      bufferSize: this.bufferSize,
+      sampleRate: this.sampleRate
+    });
+    this.worker.addEventListener('message', ({data}) => {
+      this.didDetect(data.pitch);
+    });
 
     document.addEventListener('visibilitychange', () => {
       if (document.hidden) {
@@ -47,47 +60,42 @@ class Signal extends EventEmitter {
       }
       this.connect();
     });
-    this.connected = false;
     this.connect();
   }
 
-  detect() {
+  detect(inputBuffer) {
     if (this.detecting) {
       return;
     }
-    this.analyze();
-    if (this.threshold > this.volume) {
+    this.detecting = true;
+    const buffer = inputBuffer.getChannelData(0).buffer;
+    this.worker.postMessage({
+      type: 'detect',
+      channelData: buffer
+    }, [buffer]);
+  }
+
+  didDetect(pitch) {
+    this.detecting = false;
+    if (this.range[0] > pitch || this.range[1] < pitch) {
       this.emit('didSkip');
       return;
     }
-    this.detecting = true;
-    this.analyser.getFloatTimeDomainData(this.domainData);
-    const buffer = this.domainData.buffer;
-    this.worker.postMessage({
-      domainData: buffer
-    }, [buffer]);
-    this.domainData = null;
-  }
-
-  didDetect({pitch, domainData}) {
-    this.domainData = new Float32Array(domainData);
-    this.detecting = false;
     this.emit('didDetect', {pitch});
-    this.detect();
   }
 
-  analyze() {
-    this.analyser.getByteFrequencyData(this.frequencyData);
-    let sum = 0.0;
-    const [low, high] = this.range;
-    const l = high - low;
-    // get all the frequency amplitudes
-    for (let i = low; i < high; i++) {
-      sum += this.frequencyData[i];
-    }
-    this.volume = (sum / l) / 256;
-    this.emit('didAnalyse', this);
-  }
+  // analyze() {
+  //   this.analyser.getByteFrequencyData(this.frequencyData);
+  //   let sum = 0.0;
+  //   const [low, high] = this.range;
+  //   const l = high - low;
+  //   // get all the frequency amplitudes
+  //   for (let i = low; i < high; i++) {
+  //     sum += this.frequencyData[i];
+  //   }
+  //   this.volume = (sum / l) / 256;
+  //   this.emit('didAnalyse', this);
+  // }
 
   connect() {
     if (this.connected) {
@@ -99,13 +107,12 @@ class Signal extends EventEmitter {
         const track = stream.getAudioTracks()[0];
         this.input = track;
         this.source = this.context.createMediaStreamSource(stream);
-        this.source.connect(this.analyser);
+        this.source.connect(this.script);
         this.on('didConnect');
-        this.detect();
       })
       .catch((err) => {
         this.connected = false;
-        console.error(err);
+        window.alert(err.message);
       });
   }
 

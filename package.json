@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "eslint webpack.config.babel.js src",
     "clean": "rm -rf dist",
-    "start": "webpack-dev-server --hot --inline",
+    "start": "webpack-dev-server --hot --inline --host 0.0.0.0",
     "build:dev": "npm run clean; webpack -d",
     "build:prod": "npm run clean; webpack -p"
   },
