@@ -1,10 +1,8 @@
 {
-  "name": "web-tuner",
+  "name": "chromatic-tuner-web-app",
   "version": "0.0.1",
-  "description": "Web Guitar Tuner App",
-  "main": "index.js",
+  "description": "Tune any instrument on any device",
   "scripts": {
-    "lint": "eslint webpack.config.babel.js src",
     "clean": "rm -rf dist",
     "start": "webpack-dev-server --hot --inline --host 0.0.0.0",
     "build:dev": "npm run clean; webpack -d",
