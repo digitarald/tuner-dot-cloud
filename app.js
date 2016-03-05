@@ -64,6 +64,10 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
+	const location = window.location;
+	if (/^http:.*github\.io/.test(location.href)) {
+	  location.replace(location.href.replace(/^http/, 'https'));
+	}
 	if (navigator.serviceWorker) {
 	  navigator.serviceWorker.register('./offline-worker.js').then(function () {
 	    console.log('Offlined! Continue to tune offline anytime …');
