@@ -16,7 +16,7 @@ export default class Simple extends EventEmitter {
   pitch = 0;
   note = null;
   detected = false;
-  pastDetected = false;
+  lastNote = false;
 
   set(key, value) {
     const previous = this[key];
@@ -29,11 +29,11 @@ export default class Simple extends EventEmitter {
   }
 
   update(now) {
-    const detectStarted = !this.pastDetected && this.detected;
+    const noteChanged = (this.note && this.lastNote !== this.note.whole);
     window.requestAnimationFrame(this.updateBound);
     this.volumeSpring.setEndValue(this.volume);
-    this.centsSpring.setEndValue(this.cents, detectStarted);
-    this.detectedSpring.setEndValue(this.detected ? 1 : 0, detectStarted);
+    this.centsSpring.setEndValue(this.cents, noteChanged);
+    this.detectedSpring.setEndValue(this.detected ? 1 : 0, noteChanged);
     tickSpring(now);
 
     const {ctx, size} = this.main;
@@ -73,6 +73,8 @@ export default class Simple extends EventEmitter {
     }
     ctx.restore();
     this.emit('didUpdate');
-    this.pastDetected = this.detected;
+    if (this.note && this.detected) {
+      this.lastNote = this.note.whole;
+    }
   }
 }
