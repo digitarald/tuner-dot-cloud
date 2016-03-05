@@ -25,7 +25,6 @@ export default {
     filename: 'app.js'
   },
   cache: true,
-  devtool: 'eval',
   module: {
     preLoaders: [{
       test: /\.js/,

@@ -4,8 +4,21 @@ import presets from './presets.js';
 import Simple from './simple.js';
 import './index.css';
 
-const bufferSize = 8192 / 4;
-const fftSize = 4096 / 2;
+if (navigator.serviceWorker) {
+  const location = window.location;
+  if (/^http:.*github\.io/.test(location.href)) {
+    location.replace(location.href.replace(/^http/, 'https'));
+  }
+  navigator.serviceWorker.register('./offline-worker.js')
+    .then(() => {
+      console.log('Offlined! Continue to tune offline anytime …');
+    }).catch((err) => {
+      console.error('Offlining failed', err);
+    });
+}
+
+const bufferSize = 4096;
+const fftSize = 2048;
 
 const renderer = new Simple();
 const preset = presets.get('piano');
@@ -16,16 +29,10 @@ const signal = new Signal({
 });
 signal.connect();
 
-signal.on('didAnalyse', ({volume}) => {
-  renderer.set('volume', volume);
-});
 signal.on('didSkip', () => {
   renderer.set('detected', false);
 });
-let last = window.performance.now();
 signal.on('didDetect', ({pitch}) => {
-  console.log(window.performance.now() - last);
-  last = window.performance.now();
   const note = noteFromPitch(pitch);
   renderer.set('detected', true);
   renderer.set('last', Date.now());

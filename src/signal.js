@@ -11,38 +11,34 @@ class Signal extends EventEmitter {
   volume = 0.0;
   pitch = 0.0;
   bufferSize = 2048;
-  fftSize = 2048;
   threshold = 0.05;
   range = null;
-  indexRange = null;
+  // indexRange = null;
   detecting = false;
   connected = false;
 
   constructor(options = {}) {
     super();
     Object.assign(this, options);
-    if (!this.context) {
-      this.context = new AudioContext();
+    if (!this.ctx) {
+      this.ctx = new AudioContext();
     }
-    this.sampleRate = this.context.sampleRate;
-    if (this.range) {
-      this.indexRange = [
-        Math.floor(this.pitchToIndex(this.range[0])),
-        Math.ceil(this.pitchToIndex(this.range[1]))
-      ];
-    } else {
-      this.range = null;
-    }
+    this.sampleRate = this.ctx.sampleRate;
+    // if (this.range) {
+    //   this.indexRange = [
+    //     Math.floor(this.pitchToIndex(this.range[0])),
+    //     Math.ceil(this.pitchToIndex(this.range[1]))
+    //   ];
+    // } else {
+    //   this.range = null;
+    // }
 
-    this.domainData = new Float32Array(this.fftSize);
-    this.frequencyData = new Uint8Array(this.fftSize);
-    // this.analyser = this.context.createAnalyser();
-    // this.analyser.smoothingTimeConstant = 0.07;
-    // this.analyser.fftSize = this.fftSize;
-    this.script = this.context.createScriptProcessor(this.bufferSize, 1, 1);
+    this.channelData = new Float32Array(this.bufferSize);
+    this.script = this.ctx.createScriptProcessor(this.bufferSize, 1, 1);
     this.script.onaudioprocess = (evt) => {
       this.detect(evt.inputBuffer);
     };
+    this.script.connect(this.ctx.destination);
 
     this.worker = new PitchfinderWorker();
     this.worker.postMessage({
@@ -50,8 +46,8 @@ class Signal extends EventEmitter {
       bufferSize: this.bufferSize,
       sampleRate: this.sampleRate
     });
-    this.worker.addEventListener('message', ({data}) => {
-      this.didDetect(data.pitch);
+    this.worker.addEventListener('message', (evt) => {
+      this.didDetect(evt.data);
     });
 
     document.addEventListener('visibilitychange', () => {
@@ -68,15 +64,20 @@ class Signal extends EventEmitter {
       return;
     }
     this.detecting = true;
-    const buffer = inputBuffer.getChannelData(0).buffer;
+    const source = inputBuffer.getChannelData(0);
+    for (let i = 0; i < this.bufferSize; i++) {
+      this.channelData[i] = source[i];
+    }
     this.worker.postMessage({
       type: 'detect',
-      channelData: buffer
-    }, [buffer]);
+      channelData: this.channelData.buffer
+    }, [this.channelData.buffer]);
   }
 
-  didDetect(pitch) {
+  didDetect({pitch, channelData}) {
     this.detecting = false;
+    // Prevents "An ArrayBuffer is neutered and could not be cloned."
+    this.channelData = new Float32Array(channelData);
     if (this.range[0] > pitch || this.range[1] < pitch) {
       this.emit('didSkip');
       return;
@@ -106,9 +107,9 @@ class Signal extends EventEmitter {
       .then((stream) => {
         const track = stream.getAudioTracks()[0];
         this.input = track;
-        this.source = this.context.createMediaStreamSource(stream);
+        this.source = this.ctx.createMediaStreamSource(stream);
         this.source.connect(this.script);
-        this.on('didConnect');
+        this.emit('source', this.source);
       })
       .catch((err) => {
         this.connected = false;
@@ -117,7 +118,7 @@ class Signal extends EventEmitter {
   }
 
   disconnect() {
-    if (!this.connected) {
+    if (!this.connected || !this.input) {
       return;
     }
     this.connected = false;
@@ -128,10 +129,10 @@ class Signal extends EventEmitter {
     this.on('didDisconnect');
   }
 
-  pitchToIndex(pitch) {
-    const nyquist = this.sampleRate / 2;
-    return pitch / nyquist * this.fftSize;
-  }
+  // pitchToIndex(pitch) {
+  //   const nyquist = this.sampleRate / 2;
+  //   return pitch / nyquist * this.fftSize;
+  // }
 }
 
 export default Signal;

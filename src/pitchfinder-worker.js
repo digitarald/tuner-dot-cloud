@@ -1,21 +1,21 @@
 /* eslint-env worker */
-/* global PitchFinder */
-importScripts('./src/pitchfinder-js/fft.js');
-importScripts('./src/pitchfinder-js/pitchfinder.js');
+import PitchFinder from 'exports?PitchFinder!./pitchfinder-js/pitchfinder.js';
 
 let detector = null;
 
-self.addEventListener('message', (evt) => {
-  switch (evt.data.type) {
+self.addEventListener('message', ({data}) => {
+  switch (data.type) {
     case 'init':
-      delete evt.data.type;
-      detector = PitchFinder.YIN(evt.data);
+      delete data.type;
+      detector = PitchFinder.YIN(data);
       return;
 
     case 'detect':
-      const {freq} = detector(new Float32Array(evt.data.channelData));
+      const channelData = data.channelData;
+      const pitch = detector(new Float32Array(channelData)).freq;
       postMessage({
-        pitch: freq
-      });
+        pitch,
+        channelData: channelData
+      }, [channelData]);
   }
 });
