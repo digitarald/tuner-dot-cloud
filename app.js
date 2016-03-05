@@ -1015,7 +1015,7 @@
 	      args[_key] = arguments[_key];
 	    }
 	
-	    return _ret = (_temp = (_this = _possibleConstructorReturn(this, _EventEmitter.call.apply(_EventEmitter, [this].concat(args))), _this), _this.main = new _canvas2.default('rgb(30, 68, 136)'), _this.graph = new _canvas2.default(), _this.updateBound = _this.update.bind(_this), _this.centsSpring = new _spring.Spring(0), _this.volumeSpring = new _spring.Spring(0), _this.detectedSpring = new _spring.Spring(0), _this.last = 0, _this.cents = 0, _this.volume = 0, _this.pitch = 0, _this.note = null, _this.detected = false, _this.pastDetected = false, _temp), _possibleConstructorReturn(_this, _ret);
+	    return _ret = (_temp = (_this = _possibleConstructorReturn(this, _EventEmitter.call.apply(_EventEmitter, [this].concat(args))), _this), _this.main = new _canvas2.default('rgb(30, 68, 136)'), _this.graph = new _canvas2.default(), _this.updateBound = _this.update.bind(_this), _this.centsSpring = new _spring.Spring(0), _this.volumeSpring = new _spring.Spring(0), _this.detectedSpring = new _spring.Spring(0), _this.last = 0, _this.cents = 0, _this.volume = 0, _this.pitch = 0, _this.note = null, _this.detected = false, _this.lastNote = false, _temp), _possibleConstructorReturn(_this, _ret);
 	  }
 	
 	  Simple.prototype.set = function set(key, value) {
@@ -1029,11 +1029,11 @@
 	  };
 	
 	  Simple.prototype.update = function update(now) {
-	    const detectStarted = !this.pastDetected && this.detected;
+	    const noteChanged = this.note && this.lastNote !== this.note.whole;
 	    window.requestAnimationFrame(this.updateBound);
 	    this.volumeSpring.setEndValue(this.volume);
-	    this.centsSpring.setEndValue(this.cents, detectStarted);
-	    this.detectedSpring.setEndValue(this.detected ? 1 : 0, detectStarted);
+	    this.centsSpring.setEndValue(this.cents, noteChanged);
+	    this.detectedSpring.setEndValue(this.detected ? 1 : 0, noteChanged);
 	    (0, _spring.tickSpring)(now);
 	
 	    var _main = this.main;
@@ -1073,7 +1073,9 @@
 	    }
 	    ctx.restore();
 	    this.emit('didUpdate');
-	    this.pastDetected = this.detected;
+	    if (this.note && this.detected) {
+	      this.lastNote = this.note.whole;
+	    }
 	  };
 	
 	  return Simple;
