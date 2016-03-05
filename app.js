@@ -64,11 +64,11 @@
 	
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 	
-	const location = window.location;
-	if (/^http:.*github\.io/.test(location.href)) {
-	  location.replace(location.href.replace(/^http/, 'https'));
-	}
 	if (navigator.serviceWorker) {
+	  const location = window.location;
+	  if (/^http:.*github\.io/.test(location.href)) {
+	    location.replace(location.href.replace(/^http/, 'https'));
+	  }
 	  navigator.serviceWorker.register('./offline-worker.js').then(function () {
 	    console.log('Offlined! Continue to tune offline anytime …');
 	  }).catch(function (err) {
@@ -941,7 +941,6 @@
 	      return;
 	    }
 	    this.connected = true;
-	    console.log('getUserMedia');
 	    navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
 	      const track = stream.getAudioTracks()[0];
 	      _this2.input = track;
@@ -1016,7 +1015,7 @@
 	      args[_key] = arguments[_key];
 	    }
 	
-	    return _ret = (_temp = (_this = _possibleConstructorReturn(this, _EventEmitter.call.apply(_EventEmitter, [this].concat(args))), _this), _this.main = new _canvas2.default('rgb(30, 68, 136)'), _this.graph = new _canvas2.default(), _this.updateBound = _this.update.bind(_this), _this.centsSpring = new _spring.Spring(0), _this.volumeSpring = new _spring.Spring(0), _this.detectedSpring = new _spring.Spring(0), _this.last = 0, _this.cents = 0, _this.volume = 0, _this.pitch = 0, _this.note = null, _this.detected = false, _temp), _possibleConstructorReturn(_this, _ret);
+	    return _ret = (_temp = (_this = _possibleConstructorReturn(this, _EventEmitter.call.apply(_EventEmitter, [this].concat(args))), _this), _this.main = new _canvas2.default('rgb(30, 68, 136)'), _this.graph = new _canvas2.default(), _this.updateBound = _this.update.bind(_this), _this.centsSpring = new _spring.Spring(0), _this.volumeSpring = new _spring.Spring(0), _this.detectedSpring = new _spring.Spring(0), _this.last = 0, _this.cents = 0, _this.volume = 0, _this.pitch = 0, _this.note = null, _this.detected = false, _this.pastDetected = false, _temp), _possibleConstructorReturn(_this, _ret);
 	  }
 	
 	  Simple.prototype.set = function set(key, value) {
@@ -1030,10 +1029,11 @@
 	  };
 	
 	  Simple.prototype.update = function update(now) {
+	    const detectStarted = !this.pastDetected && this.detected;
 	    window.requestAnimationFrame(this.updateBound);
 	    this.volumeSpring.setEndValue(this.volume);
-	    this.centsSpring.setEndValue(this.cents);
-	    this.detectedSpring.setEndValue(this.detected ? 1 : 0, this.detected);
+	    this.centsSpring.setEndValue(this.cents, detectStarted);
+	    this.detectedSpring.setEndValue(this.detected ? 1 : 0, detectStarted);
 	    (0, _spring.tickSpring)(now);
 	
 	    var _main = this.main;
@@ -1073,6 +1073,7 @@
 	    }
 	    ctx.restore();
 	    this.emit('didUpdate');
+	    this.pastDetected = this.detected;
 	  };
 	
 	  return Simple;

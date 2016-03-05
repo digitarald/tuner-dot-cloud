@@ -35,17 +35,17 @@
   var oghliner = self.oghliner = {
 
     // This is the unique prefix for all the caches controlled by this worker.
-    CACHE_PREFIX: 'offline-cache:digitarald/web-tuner:' + (self.registration ? self.registration.scope : '') + ':',
+    CACHE_PREFIX: 'offline-cache:digitarald/chromatic-tuner-web-app:' + (self.registration ? self.registration.scope : '') + ':',
 
     // This is the unique name for the cache controlled by this version of the worker.
     get CACHE_NAME() {
-      return this.CACHE_PREFIX + 'ba4b707a48a1526926f0da926dd8405a81222998';
+      return this.CACHE_PREFIX + 'c49c9b11a8d89443389493aacae7f203da6bb170';
     },
 
     // This is a list of resources that will be cached.
     RESOURCES: [
       './app.css', // 392ed1669aaa28864b5c014f0d230da1d3eaccd9
-      './app.js', // d96ed43358bc5512aa1fb12524ccf1e7ddd3e742
+      './app.js', // 0864deee5e1d5649e6f80677fffe2dcc9081cd1e
       './b37f57aec3052ed1f07b.worker.js', // 9363759c476179216452c8320b08b28c4aaf42c6
       './index.html', // 52d329a5293d207563bd4d19f28009a9d068b341
 
