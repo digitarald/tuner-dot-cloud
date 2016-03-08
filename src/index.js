@@ -31,10 +31,18 @@ const signal = new Signal({
   range: preset.pitchRange
 });
 signal.ready.then(() => {
+  document.body.classList.remove('is-prompting');
+  document.body.classList.add('is-silent');
   console.log('Web Audio is on the air!');
 }, (err) => {
+  document.body.classList.remove('is-prompting');
+  if (err.message.contains('not implemented')) {
+    document.body.classList.remove('is-not-supported');
+  }
   console.error('Web Audio setup failed!', err);
 });
+document.body.classList.remove('is-loading');
+document.body.classList.add('is-prompting');
 
 if (process.env.NODE_ENV === 'development') {
   signal.passthrough = true;
@@ -72,9 +80,9 @@ signal.on('didSkip', () => {
   renderer.set('detected', false);
 });
 signal.on('didDetect', ({pitch}) => {
-  if (firstDetect) {
+  if (!firstDetect) {
     firstDetect = true;
-    document.body.classList.add('has-signal');
+    document.body.classList.remove('is-silent');
   }
   const note = noteFromPitch(pitch);
   renderer.set('detected', true);

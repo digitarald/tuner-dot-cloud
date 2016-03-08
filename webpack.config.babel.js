@@ -14,7 +14,6 @@ import ExtractTextPlugin from 'extract-text-webpack-plugin';
 
 const srcDir = path.resolve(__dirname, 'src');
 const distDir = path.resolve(__dirname, 'dist');
-const cssName = 'localIdentName=[name]__[local]___[hash:base64:5]';
 const isProd = process.argv.indexOf('-p') !== -1;
 const jsFilename = isProd ? '[name].[chunkhash].js' : '[name].js';
 const cssFilename = isProd ? '[name].[chunkhash].css' : '[name].css';
@@ -47,7 +46,7 @@ export default {
       include: srcDir,
       loader: ExtractTextPlugin.extract(
         'style-loader',
-        `css-loader?modules&importLoaders=1&${cssName}!postcss-loader`
+        'css-loader!postcss-loader'
       )
     }
     ]

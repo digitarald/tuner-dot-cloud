@@ -1,6 +1,7 @@
 html, body {
   margin: 0;
   padding: 0;
+  overflow: hidden;
 }
 body {
   background-color: black;
@@ -10,4 +11,29 @@ canvas {
   left: 0;
   top: 0;
   transform-origin: 0 0;
+}
+.overlay {
+  position: absolute;
+  z-index: 1;
+  left: 1rem;
+  top: 4rem;
+  right: 1rem;
+  bottom: 1rem;
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+  color: #d1d2d3;
+  text-align: center;
+  font: 300 1.5rem/2rem 'Open Sans', sans-serif;
+}
+
+.overlay strong {
+  font-weight: 400;
+  color: #fff;
+}
+
+.is-loading #overlay-loading,
+.is-prompting #overlay-prompting,
+.is-not-supported #overlay-not-supported,
+.is-silent #overlay-silent {
+  opacity: 1;
 }

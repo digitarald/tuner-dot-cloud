@@ -3,13 +3,13 @@
   "version": "0.0.1",
   "description": "Tune any instrument on any device",
   "scripts": {
-    "clean": "rm -rf ./dist",
+    "clean": "rm -rf dist",
     "start": "webpack-dev-server --hot --inline --host 0.0.0.0",
     "build:dev": "npm run clean; webpack -d",
     "build:prod": "npm run clean; webpack -p",
-    "oghliner": "oghliner offline ./dist/; npm run post-offline; oghliner deploy ./dist/",
+    "oghliner": "oghliner offline dist/; npm run post-offline; oghliner deploy dist/",
     "deploy": "npm run build:prod; npm run oghliner",
-    "post-offline": "cp CNAME ./dist"
+    "post-offline": "cp CNAME dist"
   },
   "author": "Harald Kirschner <npm@digitarald.com> (http://digitarald.de/)",
   "license": "MIT",
@@ -32,6 +32,7 @@
     "babel-plugin-transform-es2015-parameters": "^6.5.0",
     "babel-plugin-transform-es2015-shorthand-properties": "^6.5.0",
     "babel-plugin-transform-es2015-spread": "^6.5.2",
+    "babel-plugin-transform-es2015-template-literals": "^6.6.5",
     "babel-plugin-transform-export-extensions": "^6.5.0",
     "babel-plugin-transform-runtime": "^6.5.2",
     "babel-preset-modern": "^1.0.1",
