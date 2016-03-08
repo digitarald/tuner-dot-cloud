@@ -39,15 +39,15 @@
 
     // This is the unique name for the cache controlled by this version of the worker.
     get CACHE_NAME() {
-      return this.CACHE_PREFIX + '9be80d10fc1062bd645124ceafc44b8da7c016e6';
+      return this.CACHE_PREFIX + '81c8ea782983a1d77669867269ceb00c42abc6e5';
     },
 
     // This is a list of resources that will be cached.
     RESOURCES: [
-      'dist/app.aaa948c4854d4b643b97.css', // 392ed1669aaa28864b5c014f0d230da1d3eaccd9
-      'dist/app.aaa948c4854d4b643b97.js', // 12f43f998562e006bd1e9ee361a25578568cd061
-      'dist/index.html', // 6b5e9ec2eaf778f0c6b3a72d5729372e3f8c598b
-      'dist/pitchfinder-worker.015d5c5f89d8dbb1ef7c.js', // e2bc2eab80af2131fb35c959dc89e8aed59cd7ed
+      './app.331cd5430c2928a8a09c.css', // 1faa0d0532e3179e5d6af7421999226371024be5
+      './app.331cd5430c2928a8a09c.js', // a61e1081c46da464b517865abae488c0d34aa99a
+      './index.html', // 25e4ca4c7bce54b1c789e3a0b9606e6e29ee7eac
+      './pitchfinder-worker.015d5c5f89d8dbb1ef7c.js', // e2bc2eab80af2131fb35c959dc89e8aed59cd7ed
 
     ],
 
