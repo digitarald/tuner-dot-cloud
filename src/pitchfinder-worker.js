@@ -1,5 +1,5 @@
 /* eslint-env worker */
-import PitchFinder from 'exports?PitchFinder!./pitchfinder-js/pitchfinder.js';
+import {YIN} from './pitchfinder-js/pitchfinder.js';
 
 let detector = null;
 
@@ -7,7 +7,7 @@ self.addEventListener('message', ({data}) => {
   switch (data.type) {
     case 'init':
       delete data.type;
-      detector = PitchFinder.YIN(data);
+      detector = YIN(data);
       return;
 
     case 'detect':

@@ -15,6 +15,9 @@ import ExtractTextPlugin from 'extract-text-webpack-plugin';
 const srcDir = path.resolve(__dirname, 'src');
 const distDir = path.resolve(__dirname, 'dist');
 const cssName = 'localIdentName=[name]__[local]___[hash:base64:5]';
+const isProd = process.argv.indexOf('-p') !== -1;
+const jsFilename = isProd ? '[name].[chunkhash].js' : '[name].js';
+const cssFilename = isProd ? '[name].[chunkhash].css' : '[name].css';
 
 export default {
   entry: {
@@ -22,9 +25,9 @@ export default {
   },
   output: {
     path: distDir,
-    filename: 'app.js'
+    filename: jsFilename,
+    chunkFilename: jsFilename
   },
-  cache: true,
   module: {
     preLoaders: [{
       test: /\.js/,
@@ -32,6 +35,10 @@ export default {
       loader: 'eslint'
     }],
     loaders: [{
+      test: /worker\.js$/,
+      include: srcDir,
+      loader: `worker-loader?name=${jsFilename}`
+    }, {
       test: /\.js?/,
       include: srcDir,
       loader: 'babel'
@@ -58,18 +65,22 @@ export default {
     })
   ],
   plugins: [
+    new webpack.DefinePlugin({
+      'process.env': {
+        'NODE_ENV': JSON.stringify((isProd) ? 'production' : 'development')
+      }
+    }),
     new HtmlWebpackPlugin({
       template: path.join(srcDir, 'index.html'),
+      inject: true,
       minify: {
-        collapseWhitespace: true,
-        removeRedundantAttributes: true
-      },
-      inject: true
+        removeComments: true,
+        collapseWhitespace: true
+      }
     }),
-    new ExtractTextPlugin('app.css', {
+    new ExtractTextPlugin(cssFilename, {
       allChunks: true
-    }),
-    new webpack.optimize.DedupePlugin()
+    })
   ],
   devServer: {
     port: 3000,
