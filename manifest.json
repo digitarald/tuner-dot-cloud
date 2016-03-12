@@ -4,27 +4,27 @@
   "display": "standalone",
   "icons": [
     {
-      "src": "icons/96.c5daa3.png",
+      "src": "icons/96.600406.png",
       "sizes": "96x96",
       "type": "image/png"
     },
     {
-      "src": "icons/144.db9da5.png",
+      "src": "icons/144.97cda4.png",
       "sizes": "144x144",
       "type": "image/png"
     },
     {
-      "src": "icons/192.5bffd1.png",
+      "src": "icons/192.170f2d.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "icons/512.39b2e8.png",
+      "src": "icons/512.43024f.png",
       "sizes": "512x512",
       "type": "image/png"
     }
   ],
   "start_url": "/",
-  "background_color": "#fff",
-  "theme_color": "#1e4488"
+  "background_color": "#0c99d5",
+  "theme_color": "#fff"
 }
