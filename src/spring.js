@@ -58,7 +58,7 @@ export function tickSpring(now) {
     }
     for (let j = 0; j < iterations; j++) {
       const f = spring.tension * (spring.endValue - spring.value);
-      spring.value += (spring.velocity + f * 0.5 * fdt) * fdt;
+      spring.value = spring.value + (spring.velocity + f * 0.5 * fdt) * fdt;
       spring.velocity = (spring.velocity +
         (f + spring.tension * (spring.endValue - spring.value)) * 0.5 * fdt) *
         spring.damping;
@@ -81,14 +81,14 @@ export function createSprings(values, options) {
   return springs;
 };
 
-export function setSprings(springs, values) {
+export function setSpringEndValues(springs, values) {
   for (let i = 0, l = springs.length; i < l; i++) {
-    springs[i].setEndValue(values[i]);
+    springs[i].setEndValue(Math.max(values[i], 0));
   };
 };
 
-export function forEachSpring(springs, callback) {
+export function copySpringValues(springs, output) {
   for (let i = 0, l = springs.length; i < l; i++) {
-    callback(springs[i].value, springs[i].ref);
+    output[i] = springs[i].value;
   };
 };
