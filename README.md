@@ -1,6 +1,6 @@
-# Chromatic Tuner Web App
+# [tuner.☁](https://tuner.cloud/)
 
-Tune any instrument on any device.
+Tune any instrument on any browser.
 
 ## Attributions
 
