@@ -9,7 +9,7 @@
     "build:prod": "npm run clean; webpack -p",
     "offline": "npm run build:prod; workbox generateSW workbox-config.js",
     "deploy": "npm run offline; npm run post-offline",
-    "post-offline": "cp CNAME dist"
+    "post-offline": "cp CNAME dist/CNAME"
   },
   "author": "Harald Kirschner <npm@digitarald.com> (http://digitarald.de/)",
   "license": "MIT",
